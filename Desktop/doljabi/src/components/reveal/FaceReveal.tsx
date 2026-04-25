@@ -43,6 +43,14 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
     return () => timeouts.forEach(clearTimeout);
   }, [onComplete]);
 
+  // 디버그: 생성된 이미지 상태 확인
+  useEffect(() => {
+    console.log("[FaceReveal] generatedFaces keys:", Object.keys(generatedFaces));
+    for (const age of [10, 20, 30]) {
+      console.log(`[FaceReveal] ${age}세 이미지:`, generatedFaces[age] ? `있음 (${generatedFaces[age].substring(0, 30)}...)` : "없음");
+    }
+  }, [generatedFaces]);
+
   const getCurrentImage = () => {
     const stage = AGE_STAGES[currentStage];
     if (stage.age === 1) return babyImage;

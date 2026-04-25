@@ -194,7 +194,7 @@ Facial features matured: ${faceDescription}
 - NO tattoos, NO text, NO letters, NO characters, NO watermarks on face or skin`,
   };
 
-  return ageDescriptions[targetAge] || ageDescriptions[40];
+  return ageDescriptions[targetAge] || ageDescriptions[30];
 }
 
 export async function generateAgedFace(
