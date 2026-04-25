@@ -197,6 +197,12 @@ Facial features matured: ${faceDescription}
   return ageDescriptions[targetAge] || ageDescriptions[30];
 }
 
+const IMAGE_MODELS = [
+  "imagen-4.0-generate-001",
+  "imagen-4.0-fast-generate-001",
+  "imagen-4.0-ultra-generate-001",
+];
+
 export async function generateAgedFace(
   babyImageBase64: string,
   targetAge: number,
@@ -206,25 +212,31 @@ export async function generateAgedFace(
 ): Promise<string | null> {
   const prompt = getAgePrompt(targetAge, occupation, faceDescription, gender);
 
-  try {
-    console.log(`[generateAgedFace] ${targetAge}세 Imagen 4 생성 시작`);
-    const response = await ai.models.generateImages({
-      model: "imagen-4.0-generate-001",
-      prompt,
-      config: {
-        numberOfImages: 1,
-      },
-    });
+  for (const model of IMAGE_MODELS) {
+    try {
+      console.log(`[generateAgedFace] ${targetAge}세 ${model} 시도`);
+      const response = await ai.models.generateImages({
+        model,
+        prompt,
+        config: {
+          numberOfImages: 1,
+        },
+      });
 
-    if (response.generatedImages?.[0]?.image?.imageBytes) {
-      console.log(`[generateAgedFace] ${targetAge}세 성공`);
-      return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
+      if (response.generatedImages?.[0]?.image?.imageBytes) {
+        console.log(`[generateAgedFace] ${targetAge}세 성공 (${model})`);
+        return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
+      }
+    } catch (err) {
+      const errStr = String(err);
+      if (errStr.includes("429") || errStr.includes("RESOURCE_EXHAUSTED")) {
+        console.log(`[generateAgedFace] ${model} 할당량 초과, 다음 모델로...`);
+        continue;
+      }
+      console.error(`[generateAgedFace] ${targetAge}세 ${model} 실패:`, err);
     }
-
-    console.warn(`[generateAgedFace] ${targetAge}세 응답에 이미지 없음`);
-    return null;
-  } catch (err) {
-    console.error(`[generateAgedFace] ${targetAge}세 Imagen 4 실패:`, err);
-    return null;
   }
+
+  console.warn(`[generateAgedFace] ${targetAge}세 모든 모델 실패`);
+  return null;
 }
