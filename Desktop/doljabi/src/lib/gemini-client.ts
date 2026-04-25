@@ -167,41 +167,28 @@ export async function generateAgedFace(
   occupation: string,
   faceDescription: string
 ): Promise<string | null> {
-  const base64Data = babyImageBase64.replace(/^data:image\/\w+;base64,/, "");
   const prompt = getAgePrompt(targetAge, occupation, faceDescription);
+  const fullPrompt = `${prompt}\n\n얼굴 특징을 반영하여 ${targetAge}세에 맞게 성장시킨 모습.\n스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴, 한국인.`;
 
   try {
-    console.log(`[generateAgedFace] ${targetAge}세 생성 시작`);
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              inlineData: { mimeType: "image/jpeg", data: base64Data },
-            },
-            {
-              text: `${prompt}\n\n중요: 이 사진의 아기 얼굴 특징(눈, 코, 입, 얼굴형)을 반영하되, ${targetAge}세에 맞게 성장시켜주세요.\n스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴`,
-            },
-          ],
-        },
-      ],
-      config: { responseModalities: ["image", "text"] },
+    console.log(`[generateAgedFace] ${targetAge}세 Imagen 4 생성 시작`);
+    const response = await ai.models.generateImages({
+      model: "imagen-4.0-generate-001",
+      prompt: fullPrompt,
+      config: {
+        numberOfImages: 1,
+      },
     });
 
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData?.data) {
-          console.log(`[generateAgedFace] ${targetAge}세 성공`);
-          return `data:image/png;base64,${part.inlineData.data}`;
-        }
-      }
+    if (response.generatedImages?.[0]?.image?.imageBytes) {
+      console.log(`[generateAgedFace] ${targetAge}세 성공`);
+      return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
     }
+
     console.warn(`[generateAgedFace] ${targetAge}세 응답에 이미지 없음`);
     return null;
   } catch (err) {
-    console.error(`[generateAgedFace] ${targetAge}세 실패:`, err);
+    console.error(`[generateAgedFace] ${targetAge}세 Imagen 4 실패:`, err);
     return null;
   }
 }

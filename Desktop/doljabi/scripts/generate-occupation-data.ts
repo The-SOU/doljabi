@@ -317,77 +317,35 @@ async function extractFeaturesFromText(config: OccupationConfig): Promise<Occupa
   };
 }
 
-// ─── Step 4: Gemini Image로 대표 평균 얼굴 생성 ───
+// ─── Step 4: Imagen 4로 대표 평균 얼굴 생성 ───
 
 async function generateAverageFace(
   config: OccupationConfig,
   features: OccupationFeatures
 ): Promise<string | null> {
-  console.log(`  🎨 대표 평균 얼굴 이미지 생성 중...`);
+  console.log(`  🎨 대표 평균 얼굴 이미지 생성 중 (Imagen 4)...`);
 
   const featureDesc = features.commonFeatures;
-  const prompt = `Generate a single professional headshot portrait of a fictional Korean ${config.nameKo} in their 30s.
-
-Facial features to reflect:
-- Face shape: ${featureDesc.faceShape || "average Korean face"}
-- Eyes: ${featureDesc.eyeCharacteristics || "average"}
-- Nose: ${featureDesc.noseCharacteristics || "average"}
-- Jawline: ${featureDesc.jawline || "average"}
-- Overall: ${featureDesc.overallImpression || "professional"}
-
-Style: Clean studio portrait, neutral light gray background, professional attire appropriate for a ${config.nameKo}.
-This is a completely fictional person. Semi-realistic illustrated style.`;
+  const prompt = `Professional headshot portrait of a fictional Korean ${config.nameKo} in their 30s.
+Face shape: ${featureDesc.faceShape || "average Korean face"}
+Eyes: ${featureDesc.eyeCharacteristics || "average"}
+Nose: ${featureDesc.noseCharacteristics || "average"}
+Jawline: ${featureDesc.jawline || "average"}
+Overall: ${featureDesc.overallImpression || "professional"}
+Style: Clean studio portrait, neutral light gray background, professional attire appropriate for a ${config.nameKo}. Completely fictional person, semi-realistic illustrated style.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        responseModalities: ["image", "text"],
-      },
+    const response = await ai.models.generateImages({
+      model: "imagen-4.0-generate-001",
+      prompt,
+      config: { numberOfImages: 1 },
     });
 
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData?.data) {
-          return part.inlineData.data;
-        }
-      }
+    if (response.generatedImages?.[0]?.image?.imageBytes) {
+      return response.generatedImages[0].image.imageBytes;
     }
   } catch (e) {
-    console.log(`  ⚠️  이미지 생성 실패 (Tier 1):`, (e as Error).message);
-  }
-
-  // Tier 2: Simpler prompt
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `Draw an illustrated portrait of a fictional Korean person in their 30s who works as a ${config.nameKo}.
-Semi-realistic Korean manhwa style, clean background, professional look.
-This is entirely fictional, not based on any real person.`,
-            },
-          ],
-        },
-      ],
-      config: {
-        responseModalities: ["image", "text"],
-      },
-    });
-
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData?.data) {
-          return part.inlineData.data;
-        }
-      }
-    }
-  } catch (e) {
-    console.log(`  ⚠️  이미지 생성 실패 (Tier 2):`, (e as Error).message);
+    console.log(`  ⚠️  Imagen 4 실패:`, (e as Error).message);
   }
 
   return null;
