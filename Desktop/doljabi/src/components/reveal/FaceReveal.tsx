@@ -51,7 +51,7 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-6 px-4">
-      <h2 className="text-xl font-bold text-amber-400">시간 여행 중...</h2>
+      <h2 className="text-xl font-bold text-amber-400">Age Progression Simulation</h2>
 
       {/* Age counter */}
       <div className="text-center">
