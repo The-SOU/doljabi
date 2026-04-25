@@ -3,6 +3,12 @@
 import { useRef, useState, useCallback } from "react";
 import { useSessionStore } from "@/store/session";
 
+const SAMPLE_BABIES = [
+  { src: "/images/samples/sample1.png", label: "아기 1" },
+  { src: "/images/samples/sample2.png", label: "아기 2" },
+  { src: "/images/samples/sample3.png", label: "아기 3" },
+];
+
 export default function PhotoUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -21,6 +27,25 @@ export default function PhotoUpload() {
         setBabyImage(result, file);
       };
       reader.readAsDataURL(file);
+    },
+    [setBabyImage]
+  );
+
+  const handleSampleSelect = useCallback(
+    async (src: string) => {
+      try {
+        const res = await fetch(src);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setPreview(result);
+          setBabyImage(result, new File([blob], "sample.png", { type: "image/png" }));
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error("Sample image load failed:", err);
+      }
     },
     [setBabyImage]
   );
@@ -101,6 +126,30 @@ export default function PhotoUpload() {
           if (file) processFile(file);
         }}
       />
+
+      {/* Sample babies */}
+      {!preview && (
+        <div className="w-full">
+          <p className="text-gray-500 text-xs text-center mb-3">
+            또는 예시 아기를 선택해보세요
+          </p>
+          <div className="flex justify-center gap-4">
+            {SAMPLE_BABIES.map((sample) => (
+              <button
+                key={sample.src}
+                onClick={() => handleSampleSelect(sample.src)}
+                className="w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-700 hover:border-amber-500 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <img
+                  src={sample.src}
+                  alt={sample.label}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Start Button */}
       {preview && (
