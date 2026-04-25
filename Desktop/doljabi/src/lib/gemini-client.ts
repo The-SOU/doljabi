@@ -204,9 +204,12 @@ export async function generateAgedFace(
         }
       }
     }
+    console.log(`[generateAgedFace] ${targetAge}세: Tier1 응답에 이미지 없음`);
     return null;
-  } catch {
+  } catch (err) {
+    console.error(`[generateAgedFace] ${targetAge}세 Tier1 실패:`, err);
     try {
+      console.log(`[generateAgedFace] ${targetAge}세: Tier2 시도 (사진 없이)...`);
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: [
@@ -235,8 +238,10 @@ ${targetAge}세에 맞는 나이가 반드시 표현되어야 합니다.`,
           }
         }
       }
+      console.log(`[generateAgedFace] ${targetAge}세: Tier2 응답에도 이미지 없음`);
       return null;
-    } catch {
+    } catch (err2) {
+      console.error(`[generateAgedFace] ${targetAge}세 Tier2도 실패:`, err2);
       return null;
     }
   }

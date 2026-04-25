@@ -2,14 +2,13 @@
 
 import { useRef, useState, useCallback } from "react";
 import { useSessionStore } from "@/store/session";
-import { useRouter } from "next/navigation";
 
 export default function PhotoUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const setBabyImage = useSessionStore((s) => s.setBabyImage);
-  const router = useRouter();
+  const setCurrentAct = useSessionStore((s) => s.setCurrentAct);
 
   const processFile = useCallback(
     (file: File) => {
@@ -38,7 +37,7 @@ export default function PhotoUpload() {
 
   const handleStart = () => {
     if (preview) {
-      router.push("/analyze");
+      setCurrentAct(1);
     }
   };
 
