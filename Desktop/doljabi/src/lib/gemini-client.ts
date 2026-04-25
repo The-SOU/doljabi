@@ -161,63 +161,6 @@ function getAgePrompt(targetAge: number, occupation: string, faceDescription: st
   return ageDescriptions[targetAge] || ageDescriptions[30];
 }
 
-// 이미지 모델 순차 시도 목록
-const IMAGE_MODELS = [
-  "gemini-2.5-flash-image",
-  "gemini-3.1-flash-image-preview",
-  "gemini-3-pro-image-preview",
-];
-
-function extractImageFromResponse(response: { candidates?: { content?: { parts?: { inlineData?: { data?: string } }[] } }[] }): string | null {
-  if (response.candidates?.[0]?.content?.parts) {
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData?.data) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-  }
-  return null;
-}
-
-async function tryGenerateWithModel(
-  model: string,
-  prompt: string,
-  imageData?: string
-): Promise<string | null> {
-  const parts: { inlineData?: { mimeType: string; data: string }; text?: string }[] = [];
-
-  if (imageData) {
-    parts.push({ inlineData: { mimeType: "image/jpeg", data: imageData } });
-  }
-  parts.push({ text: prompt });
-
-  const response = await ai.models.generateContent({
-    model,
-    contents: [{ role: "user", parts }],
-    config: { responseModalities: ["image", "text"] },
-  });
-
-  return extractImageFromResponse(response);
-}
-
-async function tryImagen(prompt: string): Promise<string | null> {
-  try {
-    console.log("[generateAgedFace] Imagen 4 시도...");
-    const response = await ai.models.generateImages({
-      model: "imagen-4.0-fast-generate-001",
-      prompt,
-      config: { numberOfImages: 1 },
-    });
-
-    if (response.generatedImages?.[0]?.image?.imageBytes) {
-      return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
-    }
-  } catch (err) {
-    console.error("[generateAgedFace] Imagen 4 실패:", err);
-  }
-  return null;
-}
-
 export async function generateAgedFace(
   babyImageBase64: string,
   targetAge: number,
@@ -226,46 +169,39 @@ export async function generateAgedFace(
 ): Promise<string | null> {
   const base64Data = babyImageBase64.replace(/^data:image\/\w+;base64,/, "");
   const prompt = getAgePrompt(targetAge, occupation, faceDescription);
-  const fullPrompt = `${prompt}\n\n스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴`;
-  const textOnlyPrompt = `가상의 한국인 ${targetAge}세 ${targetAge >= 25 ? occupation + " 종사자의" : "의"} 증명사진.\n얼굴 특징: ${faceDescription}\n스타일: 반실사 일러스트레이션, 정면, 가상 인물.`;
 
-  // Tier 1: 여러 Gemini 이미지 모델 순차 시도 (아기 사진 포함)
-  for (const model of IMAGE_MODELS) {
-    try {
-      console.log(`[generateAgedFace] ${targetAge}세: ${model} 시도 (사진 포함)`);
-      const result = await tryGenerateWithModel(model, fullPrompt, base64Data);
-      if (result) return result;
-    } catch (err) {
-      const errStr = String(err);
-      if (errStr.includes("429") || errStr.includes("RESOURCE_EXHAUSTED")) {
-        console.log(`[generateAgedFace] ${model} rate limit, 다음 모델로...`);
-        continue;
+  try {
+    console.log(`[generateAgedFace] ${targetAge}세 생성 시작`);
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-image",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: { mimeType: "image/jpeg", data: base64Data },
+            },
+            {
+              text: `${prompt}\n\n중요: 이 사진의 아기 얼굴 특징(눈, 코, 입, 얼굴형)을 반영하되, ${targetAge}세에 맞게 성장시켜주세요.\n스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴`,
+            },
+          ],
+        },
+      ],
+      config: { responseModalities: ["image", "text"] },
+    });
+
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData?.data) {
+          console.log(`[generateAgedFace] ${targetAge}세 성공`);
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
       }
-      if (errStr.includes("404")) {
-        console.log(`[generateAgedFace] ${model} 없음, 다음 모델로...`);
-        continue;
-      }
-      console.error(`[generateAgedFace] ${model} 에러:`, err);
     }
+    console.warn(`[generateAgedFace] ${targetAge}세 응답에 이미지 없음`);
+    return null;
+  } catch (err) {
+    console.error(`[generateAgedFace] ${targetAge}세 실패:`, err);
+    return null;
   }
-
-  // Tier 2: Gemini 이미지 모델 (사진 없이 텍스트만)
-  for (const model of IMAGE_MODELS) {
-    try {
-      console.log(`[generateAgedFace] ${targetAge}세: ${model} 시도 (텍스트만)`);
-      const result = await tryGenerateWithModel(model, textOnlyPrompt);
-      if (result) return result;
-    } catch (err) {
-      const errStr = String(err);
-      if (errStr.includes("429") || errStr.includes("404")) continue;
-      console.error(`[generateAgedFace] ${model} Tier2 에러:`, err);
-    }
-  }
-
-  // Tier 3: Imagen 4 (텍스트→이미지 전용)
-  const imagenResult = await tryImagen(textOnlyPrompt);
-  if (imagenResult) return imagenResult;
-
-  console.log(`[generateAgedFace] ${targetAge}세: 모든 모델 실패`);
-  return null;
 }

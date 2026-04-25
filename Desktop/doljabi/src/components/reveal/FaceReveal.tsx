@@ -27,51 +27,35 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
   const analysisResult = useSessionStore((s) => s.analysisResult);
   const setGeneratedFace = useSessionStore((s) => s.setGeneratedFace);
 
-  // Generate aged faces on mount — 순차 + 다중 모델 폴백
+  // Generate aged faces on mount — 병렬 호출
   useEffect(() => {
     if (!babyImage || !analysisResult) return;
 
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const occupationId = analysisResult.topOccupation.occupation.id;
-
     const generateFaces = async () => {
       const ages = [10, 20, 30];
+      let completed = 0;
 
-      for (let i = 0; i < ages.length; i++) {
-        const age = ages[i];
-        setGenerationStatus(`${age}세 얼굴 생성 중... (${i}/${ages.length})`);
+      setGenerationStatus("10세 / 20세 / 30세 얼굴 동시 생성 중...");
 
-        const result = await generateAgedFace(
-          babyImage,
-          age,
-          analysisResult.topOccupation.occupation.nameKo,
-          analysisResult.faceDescription
-        );
+      await Promise.all(
+        ages.map(async (age) => {
+          const result = await generateAgedFace(
+            babyImage,
+            age,
+            analysisResult.topOccupation.occupation.nameKo,
+            analysisResult.faceDescription
+          );
+          completed++;
+          setGenerationStatus(`얼굴 생성 중... (${completed}/${ages.length})`);
 
-        if (result) {
-          console.log(`[FaceReveal] ${age}세 이미지 생성 성공`);
-          setGeneratedFace(age, result);
-        } else {
-          console.warn(`[FaceReveal] ${age}세 AI 생성 실패`);
-          // 30세 폴백: 사전 생성된 직업 평균 얼굴 사용
-          if (age === 30) {
-            const fallbackUrl = `/data/occupations/${occupationId}-face.png`;
-            console.log(`[FaceReveal] 30세 폴백: ${fallbackUrl}`);
-            setGeneratedFace(30, fallbackUrl);
+          if (result) {
+            setGeneratedFace(age, result);
           }
-        }
+        })
+      );
 
-        setGenerationStatus(`얼굴 생성 중... (${i + 1}/${ages.length})`);
-
-        // 다음 요청 전 3초 대기
-        if (i < ages.length - 1) {
-          await sleep(3000);
-        }
-      }
-
-      console.log("[FaceReveal] 이미지 생성 완료, 애니메이션 시작");
       setGenerationStatus("생성 완료! 시간 여행 시작...");
-      await sleep(500);
+      await new Promise((r) => setTimeout(r, 500));
     };
 
     generateFaces();
