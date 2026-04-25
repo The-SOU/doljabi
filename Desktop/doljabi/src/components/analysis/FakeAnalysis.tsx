@@ -5,23 +5,23 @@ import FaceLandmarks, { type FaceMeasurements } from "./FaceLandmarks";
 import TerminalLog from "./TerminalLog";
 import ProgressBar from "./ProgressBar";
 import { useSessionStore } from "@/store/session";
-import { analyzeBabyFace, generateGwansangText } from "@/lib/gemini-client";
+import { analyzeBabyFace, generateGwansangText, generateAgedFace } from "@/lib/gemini-client";
 import { matchOccupations } from "@/lib/matching-client";
 
 interface FakeAnalysisProps {
   onComplete: () => void;
 }
 
-// 분석 단계 정의
 const STEPS = {
   INIT: { progress: 5, label: "MediaPipe Face Landmarker 초기화..." },
-  LANDMARKS_DONE: { progress: 25, label: "478개 랜드마크 감지 완료" },
-  FACE_ANALYZING: { progress: 35, label: "Gemini Vision 얼굴 분석 중..." },
-  FACE_DONE: { progress: 55, label: "얼굴 특징 벡터 추출 완료" },
-  MATCHING: { progress: 65, label: "직업 현역자 184,392명과 대조 중..." },
-  STALL: { progress: 73, label: "⚠️ 비범한 관상 감지... 정밀 재분석 중" },
-  GWANSANG: { progress: 82, label: "관상학적 근거 생성 중..." },
-  GWANSANG_DONE: { progress: 95, label: "최종 결과 암호화 중..." },
+  LANDMARKS_DONE: { progress: 15, label: "478개 랜드마크 감지 완료" },
+  FACE_ANALYZING: { progress: 25, label: "Gemini Vision 얼굴 분석 중..." },
+  FACE_DONE: { progress: 40, label: "얼굴 특징 벡터 추출 완료" },
+  MATCHING: { progress: 50, label: "직업 현역자 184,392명과 대조 중..." },
+  STALL: { progress: 58, label: "⚠️ 비범한 관상 감지... 정밀 재분석 중" },
+  GWANSANG: { progress: 65, label: "관상학적 근거 생성 중..." },
+  IMAGE_GEN: { progress: 75, label: "10세 / 20세 / 30세 얼굴 생성 중..." },
+  IMAGE_DONE: { progress: 95, label: "노화 시뮬레이션 완료" },
   COMPLETE: { progress: 100, label: "✓ 분석 완료" },
 };
 
@@ -34,6 +34,7 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   const [apiDone, setApiDone] = useState(false);
   const babyImage = useSessionStore((s) => s.babyImage);
   const setAnalysisResult = useSessionStore((s) => s.setAnalysisResult);
+  const setGeneratedFace = useSessionStore((s) => s.setGeneratedFace);
   const analysisStarted = useRef(false);
 
   const updateProgress = (step: { progress: number; label: string }) => {
@@ -42,40 +43,36 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
     setIsStalled(step === STEPS.STALL);
   };
 
-  // Start on mount
   useEffect(() => {
     setIsActive(true);
     updateProgress(STEPS.INIT);
   }, []);
 
-  // MediaPipe 측정 완료 → Gemini 분석 시작
   const handleMeasurements = useCallback((m: FaceMeasurements) => {
     setMeasurements(m);
     updateProgress(STEPS.LANDMARKS_DONE);
 
-    // 이미 시작했으면 중복 방지
     if (analysisStarted.current) return;
     analysisStarted.current = true;
-
     if (!babyImage) return;
 
     (async () => {
       try {
-        // Step: Gemini 얼굴 분석
+        // Step 1: Gemini 얼굴 분석
         updateProgress(STEPS.FACE_ANALYZING);
         const analysis = await analyzeBabyFace(babyImage);
         updateProgress(STEPS.FACE_DONE);
 
-        // Step: 직업 매칭
+        // Step 2: 직업 매칭
         updateProgress(STEPS.MATCHING);
         const matches = matchOccupations(analysis.featureVector);
         const topMatch = matches[0];
 
-        // Step: 73%에서 의도적 멈춤 (3초)
+        // Step 3: 73% 멈춤 연출
         updateProgress(STEPS.STALL);
         await new Promise((r) => setTimeout(r, 3000));
 
-        // Step: 관상학 텍스트 생성
+        // Step 4: 관상학 텍스트 생성
         updateProgress(STEPS.GWANSANG);
         const gwansangText = await generateGwansangText(
           topMatch.occupation.nameKo,
@@ -83,8 +80,6 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
           topMatch.percentage,
           topMatch.occupation.gwansangKeywords
         );
-
-        updateProgress(STEPS.GWANSANG_DONE);
 
         setAnalysisResult({
           topOccupation: topMatch,
@@ -94,7 +89,25 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
           featureVector: analysis.featureVector,
         });
 
-        // 잠깐 대기 후 완료
+        // Step 5: 이미지 생성 (병렬, 분석 화면에서 진행)
+        updateProgress(STEPS.IMAGE_GEN);
+
+        const ages = [10, 20, 30];
+        await Promise.all(
+          ages.map(async (age) => {
+            const result = await generateAgedFace(
+              babyImage,
+              age,
+              topMatch.occupation.nameKo,
+              analysis.faceDescription
+            );
+            if (result) {
+              setGeneratedFace(age, result);
+            }
+          })
+        );
+
+        updateProgress(STEPS.IMAGE_DONE);
         await new Promise((r) => setTimeout(r, 500));
         updateProgress(STEPS.COMPLETE);
         setApiDone(true);
@@ -104,9 +117,8 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
         setApiDone(true);
       }
     })();
-  }, [babyImage, setAnalysisResult]);
+  }, [babyImage, setAnalysisResult, setGeneratedFace]);
 
-  // 완료 시 다음 막으로
   useEffect(() => {
     if (apiDone) {
       const timeout = setTimeout(onComplete, 1500);
@@ -118,7 +130,6 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col gap-6 px-4">
-      {/* Title */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-amber-400 animate-pulse">
           관상 분석 진행 중
@@ -128,17 +139,14 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
         </p>
       </div>
 
-      {/* Face with real landmarks */}
       <FaceLandmarks
         imageUrl={babyImage}
         isActive={isActive}
         onMeasurements={handleMeasurements}
       />
 
-      {/* Terminal log with real measurements */}
       <TerminalLog isActive={isActive} measurements={measurements} />
 
-      {/* Progress bar — 실제 API 진행과 연동 */}
       <ProgressBar
         progress={progress}
         label={progressLabel}

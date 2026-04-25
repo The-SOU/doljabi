@@ -133,29 +133,35 @@ export async function generateTimeline(
   return JSON.parse(text);
 }
 
-// 나이별 상세 프롬프트
+// 나이별 포토리얼 프롬프트
 function getAgePrompt(targetAge: number, occupation: string, faceDescription: string): string {
   const ageDescriptions: Record<number, string> = {
-    10: `이 아기가 10세 초등학생이 된 모습을 그려주세요.
-- 얼굴 특징: ${faceDescription}
-- 어린이 느낌: 동글동글하고 귀여운 얼굴, 교복 또는 체육복 착용
-- 아기 때 특징이 남아있지만 좀 더 성숙한 느낌
-- 밝은 표정, 학교 증명사진 스타일
-- 반드시 10세 어린이처럼 보여야 합니다`,
+    10: `A photorealistic portrait photo of a 10-year-old Korean elementary school child.
+Facial features inherited from baby: ${faceDescription}
+- Round childlike face with baby fat still visible, but more mature than a toddler
+- Wearing a Korean elementary school uniform (white shirt, dark vest)
+- Bright cheerful expression, school photo style
+- Natural indoor lighting, clean light gray background
+- Shot on Canon EOS R5, 85mm lens, f/2.8
+- MUST look exactly like a real 10-year-old Korean child, NOT a cartoon or illustration`,
 
-    20: `이 아기가 20세 대학생이 된 모습을 그려주세요.
-- 얼굴 특징: ${faceDescription}
-- 청년 느낌: 날카로워진 이목구비, 성인의 얼굴형
-- 대학생 캐주얼 옷차림, 자신감 있는 표정
-- 아기 때 특징이 성인 버전으로 발전한 느낌
-- 반드시 20세 청년처럼 보여야 합니다`,
+    20: `A photorealistic portrait photo of a 20-year-old Korean university student.
+Facial features matured from childhood: ${faceDescription}
+- Sharp defined jawline, mature facial structure of a young adult
+- Wearing casual university style clothes (hoodie or neat casual shirt)
+- Confident youthful expression, natural smile
+- Natural indoor lighting, clean light gray background
+- Shot on Canon EOS R5, 85mm lens, f/2.8
+- MUST look exactly like a real 20-year-old Korean young adult, NOT a cartoon or illustration`,
 
-    30: `이 아기가 30세 ${occupation} 전문직이 된 모습을 그려주세요.
-- 얼굴 특징: ${faceDescription}
-- 전문가 느낌: 자신감, 카리스마, ${occupation}에 어울리는 복장
-- 완전히 성숙한 성인, 프로페셔널한 분위기
-- ${occupation} 직업 특유의 인상과 스타일 반영
-- 반드시 30세 성인 직업인처럼 보여야 합니다`,
+    30: `A photorealistic portrait photo of a 30-year-old Korean professional ${occupation}.
+Facial features fully matured: ${faceDescription}
+- Fully mature adult face with professional demeanor
+- Wearing professional attire specific to ${occupation} (e.g. ${occupation === "의사" ? "white doctor's coat with stethoscope" : occupation === "변호사" ? "formal suit in a law office" : occupation === "과학자" ? "lab coat in a research laboratory" : occupation === "CEO" ? "premium business suit" : occupation === "100만 유튜버" ? "casual trendy outfit with ring light and camera visible" : occupation === "아이돌" ? "stylish stage outfit with dramatic lighting" : occupation === "축구선수" ? "Korean national team soccer jersey on a field" : occupation === "셰프" ? "white chef's coat and hat in a professional kitchen" : occupation === "대통령" ? "formal suit at a presidential podium with Korean flag" : occupation === "판사" ? "black judge's robe in a courtroom" : "professional attire"})
+- Confident authoritative expression befitting a successful ${occupation}
+- Professional photography lighting
+- Shot on Canon EOS R5, 85mm lens, f/2.8
+- MUST look exactly like a real 30-year-old Korean ${occupation}, NOT a cartoon or illustration`,
   };
 
   return ageDescriptions[targetAge] || ageDescriptions[30];
@@ -168,13 +174,12 @@ export async function generateAgedFace(
   faceDescription: string
 ): Promise<string | null> {
   const prompt = getAgePrompt(targetAge, occupation, faceDescription);
-  const fullPrompt = `${prompt}\n\n얼굴 특징을 반영하여 ${targetAge}세에 맞게 성장시킨 모습.\n스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴, 한국인.`;
 
   try {
     console.log(`[generateAgedFace] ${targetAge}세 Imagen 4 생성 시작`);
     const response = await ai.models.generateImages({
       model: "imagen-4.0-generate-001",
-      prompt: fullPrompt,
+      prompt,
       config: {
         numberOfImages: 1,
       },
