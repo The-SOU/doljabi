@@ -56,6 +56,7 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
 
       setGenerationStatus("생성 완료! 시간 여행 시작...");
       await new Promise((r) => setTimeout(r, 500));
+      setImagesReady(true);
     };
 
     generateFaces();
