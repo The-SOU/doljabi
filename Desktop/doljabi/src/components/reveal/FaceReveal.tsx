@@ -27,44 +27,67 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
   const analysisResult = useSessionStore((s) => s.analysisResult);
   const setGeneratedFace = useSessionStore((s) => s.setGeneratedFace);
 
-  // Generate aged faces on mount — 병렬
+  // Generate aged faces on mount — 순차 + 재시도 (rate limit 대응)
   useEffect(() => {
     if (!babyImage || !analysisResult) return;
 
-    const generateFaces = async () => {
-      const ages = [10, 20, 30];
-      let completed = 0;
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-      const promises = ages.map(async (age) => {
-        setGenerationStatus(`${age}세 얼굴 생성 중... (${completed}/${ages.length})`);
+    const generateWithRetry = async (age: number, maxRetries: number = 2): Promise<string | null> => {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          console.log(`[FaceReveal] ${age}세 이미지 생성 시작`);
+          console.log(`[FaceReveal] ${age}세 이미지 생성 시도 ${attempt + 1}`);
           const result = await generateAgedFace(
             babyImage,
             age,
             analysisResult.topOccupation.occupation.nameKo,
             analysisResult.faceDescription
           );
-          completed++;
-          setGenerationStatus(`얼굴 생성 중... (${completed}/${ages.length})`);
-
-          if (result) {
-            console.log(`[FaceReveal] ${age}세 이미지 생성 성공`);
-            setGeneratedFace(age, result);
+          return result;
+        } catch (err: unknown) {
+          const errorStr = String(err);
+          if (errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED")) {
+            const waitTime = 35000; // 35초 대기
+            console.log(`[FaceReveal] ${age}세 Rate limit, ${waitTime / 1000}초 대기 후 재시도...`);
+            setGenerationStatus(`API 대기 중... (${Math.ceil(waitTime / 1000)}초 후 재시도)`);
+            await sleep(waitTime);
           } else {
-            console.warn(`[FaceReveal] ${age}세 이미지 null 반환됨`);
+            console.error(`[FaceReveal] ${age}세 에러:`, err);
+            if (attempt === maxRetries) return null;
           }
-        } catch (err) {
-          completed++;
-          console.error(`[FaceReveal] ${age}세 이미지 생성 에러:`, err);
         }
-      });
+      }
+      return null;
+    };
 
-      await Promise.all(promises);
+    const generateFaces = async () => {
+      const ages = [10, 20, 30];
+
+      // 순차 실행 — rate limit 방지
+      for (let i = 0; i < ages.length; i++) {
+        const age = ages[i];
+        setGenerationStatus(`${age}세 얼굴 생성 중... (${i}/${ages.length})`);
+
+        const result = await generateWithRetry(age);
+
+        if (result) {
+          console.log(`[FaceReveal] ${age}세 이미지 생성 성공`);
+          setGeneratedFace(age, result);
+        } else {
+          console.warn(`[FaceReveal] ${age}세 이미지 생성 실패`);
+        }
+
+        setGenerationStatus(`얼굴 생성 중... (${i + 1}/${ages.length})`);
+
+        // 다음 요청 전 5초 대기 (rate limit 여유)
+        if (i < ages.length - 1) {
+          await sleep(5000);
+        }
+      }
+
       console.log("[FaceReveal] 모든 이미지 생성 완료, 애니메이션 시작");
       setGenerationStatus("생성 완료! 시간 여행 시작...");
-      // 짧은 딜레이 후 애니메이션 시작
-      setTimeout(() => setImagesReady(true), 500);
+      await sleep(500);
     };
 
     generateFaces();
