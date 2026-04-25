@@ -32,8 +32,10 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
 
     setAgedFaceLoading(true);
 
+    // 병렬로 3개 나이의 이미지를 동시 생성
     const generateFaces = async () => {
-      for (const age of [10, 20, 30]) {
+      const ages = [10, 20, 30];
+      const promises = ages.map(async (age) => {
         try {
           const result = await generateAgedFace(
             babyImage,
@@ -47,7 +49,8 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
         } catch {
           // Continue without generated image
         }
-      }
+      });
+      await Promise.all(promises);
       setAgedFaceLoading(false);
     };
 

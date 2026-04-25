@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import FaceLandmarks from "./FaceLandmarks";
+import FaceLandmarks, { type FaceMeasurements } from "./FaceLandmarks";
 import TerminalLog from "./TerminalLog";
 import ProgressBar from "./ProgressBar";
 import { useSessionStore } from "@/store/session";
@@ -16,6 +16,7 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   const [isActive, setIsActive] = useState(false);
   const [progressDone, setProgressDone] = useState(false);
   const [apiDone, setApiDone] = useState(false);
+  const [measurements, setMeasurements] = useState<FaceMeasurements | null>(null);
   const babyImage = useSessionStore((s) => s.babyImage);
   const setAnalysisResult = useSessionStore((s) => s.setAnalysisResult);
 
@@ -23,7 +24,6 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   useEffect(() => {
     setIsActive(true);
 
-    // Fire real Gemini API call directly from client
     if (babyImage) {
       (async () => {
         try {
@@ -66,6 +66,10 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
     setProgressDone(true);
   }, []);
 
+  const handleMeasurements = useCallback((m: FaceMeasurements) => {
+    setMeasurements(m);
+  }, []);
+
   if (!babyImage) return null;
 
   return (
@@ -76,15 +80,22 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
           관상 분석 진행 중
         </h2>
         <p className="text-xs text-gray-500 mt-1">
-          Gemini 관상학 엔진이 열일하고 있습니다...
+          Gemini 관상학 엔진 + MediaPipe Face Landmarker
         </p>
       </div>
 
-      {/* Face with landmarks */}
-      <FaceLandmarks imageUrl={babyImage} isActive={isActive} />
+      {/* Face with real landmarks */}
+      <FaceLandmarks
+        imageUrl={babyImage}
+        isActive={isActive}
+        onMeasurements={handleMeasurements}
+      />
 
-      {/* Terminal log */}
-      <TerminalLog isActive={isActive} />
+      {/* Terminal log with real measurements */}
+      <TerminalLog
+        isActive={isActive}
+        measurements={measurements}
+      />
 
       {/* Progress bar */}
       <ProgressBar isActive={isActive} onComplete={handleProgressComplete} />

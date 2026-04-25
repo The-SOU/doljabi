@@ -133,6 +133,34 @@ export async function generateTimeline(
   return JSON.parse(text);
 }
 
+// 나이별 상세 프롬프트
+function getAgePrompt(targetAge: number, occupation: string, faceDescription: string): string {
+  const ageDescriptions: Record<number, string> = {
+    10: `이 아기가 10세 초등학생이 된 모습을 그려주세요.
+- 얼굴 특징: ${faceDescription}
+- 어린이 느낌: 동글동글하고 귀여운 얼굴, 교복 또는 체육복 착용
+- 아기 때 특징이 남아있지만 좀 더 성숙한 느낌
+- 밝은 표정, 학교 증명사진 스타일
+- 반드시 10세 어린이처럼 보여야 합니다`,
+
+    20: `이 아기가 20세 대학생이 된 모습을 그려주세요.
+- 얼굴 특징: ${faceDescription}
+- 청년 느낌: 날카로워진 이목구비, 성인의 얼굴형
+- 대학생 캐주얼 옷차림, 자신감 있는 표정
+- 아기 때 특징이 성인 버전으로 발전한 느낌
+- 반드시 20세 청년처럼 보여야 합니다`,
+
+    30: `이 아기가 30세 ${occupation} 전문직이 된 모습을 그려주세요.
+- 얼굴 특징: ${faceDescription}
+- 전문가 느낌: 자신감, 카리스마, ${occupation}에 어울리는 복장
+- 완전히 성숙한 성인, 프로페셔널한 분위기
+- ${occupation} 직업 특유의 인상과 스타일 반영
+- 반드시 30세 성인 직업인처럼 보여야 합니다`,
+  };
+
+  return ageDescriptions[targetAge] || ageDescriptions[30];
+}
+
 export async function generateAgedFace(
   babyImageBase64: string,
   targetAge: number,
@@ -140,6 +168,7 @@ export async function generateAgedFace(
   faceDescription: string
 ): Promise<string | null> {
   const base64Data = babyImageBase64.replace(/^data:image\/\w+;base64,/, "");
+  const prompt = getAgePrompt(targetAge, occupation, faceDescription);
 
   try {
     const response = await ai.models.generateContent({
@@ -155,10 +184,10 @@ export async function generateAgedFace(
               },
             },
             {
-              text: `이 아기의 얼굴 특징을 참고하여, ${targetAge}세가 된 한국인의 증명사진 스타일 초상화를 그려주세요.
-특징: ${faceDescription}
-${targetAge >= 25 ? `직업: ${occupation}. 해당 직업에 어울리는 복장과 분위기.` : ""}
-스타일: 반실사 일러스트레이션, 깔끔한 배경, 정면 얼굴`,
+              text: `${prompt}
+
+중요: 이 사진의 아기의 얼굴 특징(눈, 코, 입, 얼굴형)을 반드시 반영하되, ${targetAge}세에 맞게 노화/성장시켜주세요.
+스타일: 반실사 일러스트레이션, 깔끔한 회색 배경, 증명사진 구도, 정면 얼굴`,
             },
           ],
         },
@@ -185,10 +214,11 @@ ${targetAge >= 25 ? `직업: ${occupation}. 해당 직업에 어울리는 복장
             role: "user",
             parts: [
               {
-                text: `${targetAge}세 한국인의 증명사진 스타일 초상화를 그려주세요.
+                text: `가상의 한국인 ${targetAge}세 ${targetAge >= 25 ? occupation + " 종사자의" : "의"} 증명사진을 그려주세요.
 얼굴 특징: ${faceDescription}
-${targetAge >= 25 ? `직업: ${occupation}. 해당 직업에 어울리는 복장.` : ""}
-스타일: 반실사 일러스트레이션, 깔끔한 배경, 정면 얼굴. 가상의 인물입니다.`,
+나이: 정확히 ${targetAge}세 (${targetAge === 10 ? "초등학생" : targetAge === 20 ? "대학생" : "직장인"})
+스타일: 반실사 일러스트레이션, 깔끔한 배경, 정면. 완전한 가상 인물입니다.
+${targetAge}세에 맞는 나이가 반드시 표현되어야 합니다.`,
               },
             ],
           },
