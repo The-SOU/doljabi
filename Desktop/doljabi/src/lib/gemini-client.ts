@@ -163,7 +163,9 @@ Facial features inherited from baby: ${faceDescription}
 - Natural indoor lighting, clean light gray background
 - Shot on Canon EOS R5, 85mm lens, f/2.8
 - MUST look exactly like a real 10-year-old Korean ${child}, NOT a cartoon or illustration
-- Gender: ${genderEn}`,
+- Gender: ${genderEn}
+- MUST have dark brown or black iris color (Korean eyes)
+- NO tattoos, NO text, NO letters, NO characters, NO watermarks on face or skin`,
 
     20: `A photorealistic portrait photo of a 20-year-old Korean ${youngAdult}, university student.
 Facial features matured from childhood: ${faceDescription}
@@ -173,7 +175,9 @@ Facial features matured from childhood: ${faceDescription}
 - Natural indoor lighting, clean light gray background
 - Shot on Canon EOS R5, 85mm lens, f/2.8
 - MUST look exactly like a real 20-year-old Korean ${youngAdult}, NOT a cartoon or illustration
-- Gender: ${genderEn}`,
+- Gender: ${genderEn}
+- MUST have dark brown or black iris color (Korean eyes)
+- NO tattoos, NO text, NO letters, NO characters, NO watermarks on face or skin`,
 
     30: `A photorealistic portrait photo of a 30-year-old Korean ${genderEn} professional ${occupation}.
 Facial features matured: ${faceDescription}
@@ -185,7 +189,9 @@ Facial features matured: ${faceDescription}
 - Shot on Canon EOS R5, 85mm lens, f/2.8
 - MUST look exactly like a real 30-year-old Korean ${genderKo} ${occupation}, NOT a cartoon or illustration
 - The person should look young, in their early 30s — older than 20 but still youthful
-- Gender: ${genderEn}`,
+- Gender: ${genderEn}
+- MUST have dark brown or black iris color (Korean eyes)
+- NO tattoos, NO text, NO letters, NO characters, NO watermarks on face or skin`,
   };
 
   return ageDescriptions[targetAge] || ageDescriptions[40];
