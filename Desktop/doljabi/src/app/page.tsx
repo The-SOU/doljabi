@@ -30,53 +30,37 @@ export default function Home() {
             transition={{ duration: 0.5 }}
           >
             <div className="max-w-lg mx-auto px-6 py-12 flex flex-col items-center">
-              <div className="text-center mb-10">
-                <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                  제미나이 돌잡이
-                </h1>
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  AI가 예측하는 우리 아이의 30년 후
-                </p>
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
-                  <span className="px-2 py-1 bg-gray-800 rounded-full">Powered by Gemini</span>
-                  <span className="px-2 py-1 bg-gray-800 rounded-full">Doljabi AI v2.7</span>
-                </div>
+              {/* [1] 타이틀 */}
+              <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+                Google Doljabi
+              </h1>
+
+              {/* [2] 한 줄 카피 */}
+              <p className="mt-4 text-gray-200 text-base md:text-lg text-center font-medium">
+                AI가 당신의 아기 얼굴에서 30년 후를 읽어냅니다
+              </p>
+
+              {/* [3] 보조 설명 */}
+              <p className="mt-2 text-gray-500 text-xs text-center">
+                사진 한 장으로 미래 직업 · 얼굴 · 커리어를 예측합니다
+              </p>
+
+              {/* [4] 신뢰 시그널 */}
+              <div className="mt-3 text-[10px] text-gray-600 text-center">
+                Powered by Gemini · Doljabi AI v2.7
               </div>
 
-              <div className="grid grid-cols-5 gap-3 mb-10 w-full">
-                {[
-                  { emoji: "🩺", name: "의사" },
-                  { emoji: "⚖️", name: "변호사" },
-                  { emoji: "🔬", name: "과학자" },
-                  { emoji: "💼", name: "CEO" },
-                  { emoji: "🎬", name: "유튜버" },
-                  { emoji: "🎤", name: "아이돌" },
-                  { emoji: "⚽", name: "축구선수" },
-                  { emoji: "👨‍🍳", name: "셰프" },
-                  { emoji: "🏛️", name: "대통령" },
-                  { emoji: "🔨", name: "판사" },
-                ].map((item) => (
-                  <div
-                    key={item.name}
-                    className="flex flex-col items-center gap-1 p-2 rounded-lg bg-gray-800/50"
-                  >
-                    <span className="text-2xl">{item.emoji}</span>
-                    <span className="text-[10px] text-gray-400">{item.name}</span>
-                  </div>
-                ))}
-              </div>
+              {/* 구분선 */}
+              <div className="w-full max-w-xs border-t border-gray-800 my-8" />
 
+              {/* [5] 업로드 + [6] 성별 + [7] 예시 */}
               <PhotoUpload />
 
-              <p className="mt-8 text-[10px] text-gray-700 text-center leading-relaxed">
-                본 서비스는 엔터테인먼트 목적으로 제작되었으며,
+              {/* [8] 디스클레이머 */}
+              <p className="mt-10 text-[9px] text-gray-700 text-center leading-relaxed">
+                본 서비스는 엔터테인먼트 목적으로 제작되었으며 AI의 분석 결과는 과학적 근거가 없습니다.
                 <br />
-                AI의 분석 결과는 과학적 근거가 전혀 없습니다.
-                <br />
-                &ldquo;쓸모없는 AI 만들기&rdquo; 해커톤 출품작
-              </p>
-              <p className="mt-4 text-[9px] text-gray-800 font-mono">
-                v2.1.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
+                &ldquo;쓸모없는 AI 만들기&rdquo; 해커톤 출품작 · v2.2.0
               </p>
             </div>
           </motion.div>
