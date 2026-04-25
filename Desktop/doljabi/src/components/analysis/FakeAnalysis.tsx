@@ -18,9 +18,9 @@ const STEPS = {
   FACE_ANALYZING: { progress: 25, label: "Gemini Vision 얼굴 분석 중..." },
   FACE_DONE: { progress: 40, label: "얼굴 특징 벡터 추출 완료" },
   MATCHING: { progress: 50, label: "직업 현역자 184,392명과 대조 중..." },
-  STALL: { progress: 58, label: "⚠️ 비범한 관상 감지... 정밀 재분석 중" },
-  GWANSANG: { progress: 65, label: "관상학적 근거 생성 중..." },
-  IMAGE_GEN: { progress: 75, label: "10세 / 20세 / 30세 얼굴 생성 중..." },
+  STALL: { progress: 58, label: "⚠️ 비범한 기상 감지... 정밀 재분석 중" },
+  GWANSANG: { progress: 65, label: "AI 예측 근거 생성 중..." },
+  IMAGE_GEN: { progress: 75, label: "10세 / 20세 / 40세 얼굴 생성 중..." },
   IMAGE_DONE: { progress: 95, label: "노화 시뮬레이션 완료" },
   COMPLETE: { progress: 100, label: "✓ 분석 완료" },
 };
@@ -29,7 +29,7 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   const [isActive, setIsActive] = useState(false);
   const [measurements, setMeasurements] = useState<FaceMeasurements | null>(null);
   const [progress, setProgress] = useState(0);
-  const [progressLabel, setProgressLabel] = useState("관상 분석 준비 중...");
+  const [progressLabel, setProgressLabel] = useState("돌잡이 분석 준비 중...");
   const [isStalled, setIsStalled] = useState(false);
   const [apiDone, setApiDone] = useState(false);
   const babyImage = useSessionStore((s) => s.babyImage);
@@ -134,10 +134,10 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
     <div className="w-full max-w-lg mx-auto flex flex-col gap-6 px-4">
       <div className="text-center">
         <h2 className="text-xl font-bold text-amber-400 animate-pulse">
-          관상 분석 진행 중
+          AI 돌잡이 분석 진행 중
         </h2>
         <p className="text-xs text-gray-500 mt-1">
-          Gemini 관상학 엔진 + MediaPipe Face Landmarker
+          Gemini AI + MediaPipe Face Landmarker
         </p>
       </div>
 

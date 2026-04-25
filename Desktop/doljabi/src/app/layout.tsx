@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "제미나이 돌잡이 | AI 관상학으로 보는 30년 후",
+  title: "제미나이 돌잡이 | AI가 예측하는 우리 아이의 40년 후",
   description:
-    "아기 얼굴 사진 한 장으로 30년 후 직업을 예측합니다. Gemini AI 관상학 엔진 v2.7",
+    "아기 얼굴 사진 한 장으로 40년 후 직업을 예측합니다. Gemini AI 돌잡이 엔진",
 };
 
 export default function RootLayout({

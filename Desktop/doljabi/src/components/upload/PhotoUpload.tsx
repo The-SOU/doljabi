@@ -183,7 +183,7 @@ export default function PhotoUpload() {
           onClick={handleStart}
           className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg shadow-amber-500/25 active:scale-95"
         >
-          🔮 관상 분석 시작하기
+          🔮 돌잡이 분석 시작하기
         </button>
       )}
     </div>

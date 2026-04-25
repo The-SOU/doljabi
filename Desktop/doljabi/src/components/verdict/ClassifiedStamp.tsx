@@ -19,10 +19,10 @@ export default function ClassifiedStamp() {
     >
       <div className="border-4 border-red-600 rounded-md px-3 py-1.5 bg-transparent">
         <div className="text-red-600 font-black text-lg md:text-xl tracking-wider whitespace-nowrap">
-          1급 기밀
+          대 외 비
         </div>
         <div className="text-red-600/70 text-[8px] text-center tracking-widest">
-          CLASSIFIED
+          CONFIDENTIAL
         </div>
       </div>
     </motion.div>

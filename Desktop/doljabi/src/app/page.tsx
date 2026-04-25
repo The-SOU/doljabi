@@ -7,7 +7,6 @@ import PhotoUpload from "@/components/upload/PhotoUpload";
 import FakeAnalysis from "@/components/analysis/FakeAnalysis";
 import FaceReveal from "@/components/reveal/FaceReveal";
 import CareerVerdict from "@/components/verdict/CareerVerdict";
-import CareerTimeline from "@/components/timeline/CareerTimeline";
 import SharePanel from "@/components/share/SharePanel";
 
 export default function Home() {
@@ -16,7 +15,6 @@ export default function Home() {
 
   const goToAct2 = useCallback(() => setCurrentAct(2), [setCurrentAct]);
   const goToAct3 = useCallback(() => setCurrentAct(3), [setCurrentAct]);
-  const goToAct4 = useCallback(() => setCurrentAct(4), [setCurrentAct]);
   const goToAct5 = useCallback(() => setCurrentAct(5), [setCurrentAct]);
 
   return (
@@ -37,11 +35,11 @@ export default function Home() {
                   제미나이 돌잡이
                 </h1>
                 <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  AI 관상학으로 보는 우리 아이의 30년 후
+                  AI가 예측하는 우리 아이의 40년 후
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
                   <span className="px-2 py-1 bg-gray-800 rounded-full">Powered by Gemini</span>
-                  <span className="px-2 py-1 bg-gray-800 rounded-full">관상학 v2.7</span>
+                  <span className="px-2 py-1 bg-gray-800 rounded-full">Doljabi AI v2.7</span>
                 </div>
               </div>
 
@@ -78,7 +76,7 @@ export default function Home() {
                 &ldquo;쓸모없는 AI 만들기&rdquo; 해커톤 출품작
               </p>
               <p className="mt-4 text-[9px] text-gray-800 font-mono">
-                v1.8.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
+                v1.9.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
               </p>
             </div>
           </motion.div>
@@ -112,7 +110,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Act 3: 직업 판정 */}
+        {/* Act 3: 직업 판정 + 타임라인 */}
         {currentAct === 3 && (
           <motion.div
             key="act3"
@@ -122,21 +120,7 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="py-8 md:py-12"
           >
-            <CareerVerdict onComplete={goToAct4} />
-          </motion.div>
-        )}
-
-        {/* Act 4: 타임라인 */}
-        {currentAct === 4 && (
-          <motion.div
-            key="act4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="py-8 md:py-12"
-          >
-            <CareerTimeline onComplete={goToAct5} />
+            <CareerVerdict onComplete={goToAct5} />
           </motion.div>
         )}
 

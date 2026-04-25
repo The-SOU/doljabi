@@ -100,7 +100,7 @@ export default function TerminalLog({ isActive, measurements, onComplete }: Term
     >
       {/* Header */}
       <div className="text-green-600 mb-2 text-[10px]">
-        ── Gemini 관상학 엔진 v2.7.3 + MediaPipe Face Landmarker ──
+        ── Gemini Doljabi AI + MediaPipe Face Landmarker ──
       </div>
 
       {/* Completed lines */}
