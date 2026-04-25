@@ -133,47 +133,73 @@ export async function generateTimeline(
   return JSON.parse(text);
 }
 
-// 나이별 포토리얼 프롬프트
-function getAgePrompt(targetAge: number, occupation: string, faceDescription: string): string {
+// 직업별 복장 매핑
+function getOccupationAttire(occupation: string): string {
+  const attireMap: Record<string, string> = {
+    "의사": "white doctor's coat with stethoscope around neck, in a modern hospital",
+    "변호사": "formal dark suit with tie, in a law office with bookshelves",
+    "과학자": "white lab coat, in a research laboratory with equipment",
+    "CEO": "premium tailored business suit, in a luxury office with city view",
+    "100만 유튜버": "casual trendy streetwear, with ring light and camera setup visible behind",
+    "아이돌": "stylish K-pop stage outfit, with dramatic concert lighting",
+    "축구선수": "Korean national team soccer jersey, on a soccer field",
+    "셰프": "white chef's coat and tall chef hat, in a professional kitchen",
+    "대통령": "formal navy suit with Korean flag pin, at a presidential podium with Korean flags",
+    "판사": "black judge's robe, in a courtroom setting",
+  };
+  return attireMap[occupation] || "professional attire";
+}
+
+// 나이별 포토리얼 프롬프트 (성별 반영)
+function getAgePrompt(targetAge: number, occupation: string, faceDescription: string, gender: string): string {
+  const genderKo = gender === "male" ? "남성" : "여성";
+  const genderEn = gender === "male" ? "male" : "female";
+  const child = gender === "male" ? "boy" : "girl";
+  const youngAdult = gender === "male" ? "young man" : "young woman";
+
   const ageDescriptions: Record<number, string> = {
-    10: `A photorealistic portrait photo of a 10-year-old Korean elementary school child.
+    10: `A photorealistic portrait photo of a 10-year-old Korean ${child}.
 Facial features inherited from baby: ${faceDescription}
-- Round childlike face with baby fat still visible, but more mature than a toddler
-- Wearing a Korean elementary school uniform (white shirt, dark vest)
+- Round childlike face with baby fat still visible, but clearly a ${child}
+- Wearing a Korean elementary school uniform
 - Bright cheerful expression, school photo style
 - Natural indoor lighting, clean light gray background
 - Shot on Canon EOS R5, 85mm lens, f/2.8
-- MUST look exactly like a real 10-year-old Korean child, NOT a cartoon or illustration`,
+- MUST look exactly like a real 10-year-old Korean ${child}, NOT a cartoon or illustration
+- Gender: ${genderEn}`,
 
-    20: `A photorealistic portrait photo of a 20-year-old Korean university student.
+    20: `A photorealistic portrait photo of a 20-year-old Korean ${youngAdult}, university student.
 Facial features matured from childhood: ${faceDescription}
-- Sharp defined jawline, mature facial structure of a young adult
-- Wearing casual university style clothes (hoodie or neat casual shirt)
+- Sharp defined jawline, mature facial structure of a ${youngAdult}
+- Wearing casual university style clothes
 - Confident youthful expression, natural smile
 - Natural indoor lighting, clean light gray background
 - Shot on Canon EOS R5, 85mm lens, f/2.8
-- MUST look exactly like a real 20-year-old Korean young adult, NOT a cartoon or illustration`,
+- MUST look exactly like a real 20-year-old Korean ${youngAdult}, NOT a cartoon or illustration
+- Gender: ${genderEn}`,
 
-    30: `A photorealistic portrait photo of a 30-year-old Korean professional ${occupation}.
+    40: `A photorealistic portrait photo of a 40-year-old Korean ${genderEn} professional ${occupation}.
 Facial features fully matured: ${faceDescription}
-- Fully mature adult face with professional demeanor
-- Wearing professional attire specific to ${occupation} (e.g. ${occupation === "의사" ? "white doctor's coat with stethoscope" : occupation === "변호사" ? "formal suit in a law office" : occupation === "과학자" ? "lab coat in a research laboratory" : occupation === "CEO" ? "premium business suit" : occupation === "100만 유튜버" ? "casual trendy outfit with ring light and camera visible" : occupation === "아이돌" ? "stylish stage outfit with dramatic lighting" : occupation === "축구선수" ? "Korean national team soccer jersey on a field" : occupation === "셰프" ? "white chef's coat and hat in a professional kitchen" : occupation === "대통령" ? "formal suit at a presidential podium with Korean flag" : occupation === "판사" ? "black judge's robe in a courtroom" : "professional attire"})
+- Fully mature adult ${genderEn} face with professional demeanor and slight signs of aging
+- ${getOccupationAttire(occupation)}
 - Confident authoritative expression befitting a successful ${occupation}
 - Professional photography lighting
 - Shot on Canon EOS R5, 85mm lens, f/2.8
-- MUST look exactly like a real 30-year-old Korean ${occupation}, NOT a cartoon or illustration`,
+- MUST look exactly like a real 40-year-old Korean ${genderKo} ${occupation}, NOT a cartoon or illustration
+- Gender: ${genderEn}`,
   };
 
-  return ageDescriptions[targetAge] || ageDescriptions[30];
+  return ageDescriptions[targetAge] || ageDescriptions[40];
 }
 
 export async function generateAgedFace(
   babyImageBase64: string,
   targetAge: number,
   occupation: string,
-  faceDescription: string
+  faceDescription: string,
+  gender: string = "male"
 ): Promise<string | null> {
-  const prompt = getAgePrompt(targetAge, occupation, faceDescription);
+  const prompt = getAgePrompt(targetAge, occupation, faceDescription, gender);
 
   try {
     console.log(`[generateAgedFace] ${targetAge}세 Imagen 4 생성 시작`);

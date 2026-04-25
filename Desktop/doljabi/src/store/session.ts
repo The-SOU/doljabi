@@ -3,11 +3,13 @@ import type { MatchResult } from "@/lib/matching";
 import type { TimelineEvent } from "@/lib/gemini";
 
 export type Act = 0 | 1 | 2 | 3 | 4 | 5;
+export type Gender = "male" | "female";
 
 interface SessionState {
   // Upload
-  babyImage: string | null; // base64 data URL
+  babyImage: string | null;
   babyImageFile: File | null;
+  gender: Gender;
 
   // Flow
   currentAct: Act;
@@ -22,7 +24,7 @@ interface SessionState {
   } | null;
 
   // Generated images
-  generatedFaces: Record<number, string>; // age -> base64
+  generatedFaces: Record<number, string>;
   agedFaceLoading: boolean;
 
   // Timeline
@@ -31,6 +33,7 @@ interface SessionState {
 
   // Actions
   setBabyImage: (image: string, file: File) => void;
+  setGender: (gender: Gender) => void;
   setCurrentAct: (act: Act) => void;
   setAnalysisResult: (result: SessionState["analysisResult"]) => void;
   setGeneratedFace: (age: number, base64: string) => void;
@@ -43,6 +46,7 @@ interface SessionState {
 const initialState = {
   babyImage: null,
   babyImageFile: null,
+  gender: "male" as Gender,
   currentAct: 0 as Act,
   analysisResult: null,
   generatedFaces: {},
@@ -55,6 +59,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   ...initialState,
 
   setBabyImage: (image, file) => set({ babyImage: image, babyImageFile: file }),
+  setGender: (gender) => set({ gender }),
   setCurrentAct: (act) => set({ currentAct: act }),
   setAnalysisResult: (result) => set({ analysisResult: result }),
   setGeneratedFace: (age, base64) =>

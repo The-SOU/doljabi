@@ -33,6 +33,7 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   const [isStalled, setIsStalled] = useState(false);
   const [apiDone, setApiDone] = useState(false);
   const babyImage = useSessionStore((s) => s.babyImage);
+  const gender = useSessionStore((s) => s.gender);
   const setAnalysisResult = useSessionStore((s) => s.setAnalysisResult);
   const setGeneratedFace = useSessionStore((s) => s.setGeneratedFace);
   const analysisStarted = useRef(false);
@@ -92,14 +93,15 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
         // Step 5: 이미지 생성 (병렬, 분석 화면에서 진행)
         updateProgress(STEPS.IMAGE_GEN);
 
-        const ages = [10, 20, 30];
+        const ages = [10, 20, 40];
         await Promise.all(
           ages.map(async (age) => {
             const result = await generateAgedFace(
               babyImage,
               age,
               topMatch.occupation.nameKo,
-              analysis.faceDescription
+              analysis.faceDescription,
+              gender
             );
             if (result) {
               setGeneratedFace(age, result);

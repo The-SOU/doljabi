@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import { useSessionStore } from "@/store/session";
+import { useSessionStore, type Gender } from "@/store/session";
 
 const SAMPLE_BABIES = [
   { src: "/images/samples/sample1.png", label: "아기 1" },
@@ -15,6 +15,8 @@ export default function PhotoUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const setBabyImage = useSessionStore((s) => s.setBabyImage);
   const setCurrentAct = useSessionStore((s) => s.setCurrentAct);
+  const gender = useSessionStore((s) => s.gender);
+  const setGender = useSessionStore((s) => s.setGender);
 
   const processFile = useCallback(
     (file: File) => {
@@ -68,6 +70,30 @@ export default function PhotoUpload() {
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+      {/* Gender Selection */}
+      <div className="w-full">
+        <p className="text-gray-400 text-sm text-center mb-3">아기의 성별을 선택해주세요</p>
+        <div className="flex justify-center gap-3">
+          {([
+            { value: "male" as Gender, label: "남아", emoji: "👦" },
+            { value: "female" as Gender, label: "여아", emoji: "👧" },
+          ]).map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setGender(option.value)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                gender === option.value
+                  ? "bg-amber-500/20 border-2 border-amber-500 text-amber-400"
+                  : "bg-gray-800/50 border-2 border-gray-700 text-gray-400 hover:border-gray-500"
+              }`}
+            >
+              <span className="text-xl">{option.emoji}</span>
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Drop Zone */}
       <div
         className={`relative w-full aspect-square rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden ${

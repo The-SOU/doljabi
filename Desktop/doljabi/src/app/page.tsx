@@ -78,7 +78,7 @@ export default function Home() {
                 &ldquo;쓸모없는 AI 만들기&rdquo; 해커톤 출품작
               </p>
               <p className="mt-4 text-[9px] text-gray-800 font-mono">
-                v1.7.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
+                v1.8.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
               </p>
             </div>
           </motion.div>

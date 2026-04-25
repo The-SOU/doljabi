@@ -12,7 +12,7 @@ const AGE_STAGES = [
   { age: 1, label: "1세 (현재)" },
   { age: 10, label: "10세" },
   { age: 20, label: "20세" },
-  { age: 30, label: "30세" },
+  { age: 40, label: "40세" },
 ];
 
 export default function FaceReveal({ onComplete }: FaceRevealProps) {
@@ -104,7 +104,7 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
             animate={{ opacity: 1, y: 0 }}
             className="text-[10px] text-gray-600 font-mono text-center leading-relaxed bg-black/50 px-4 py-2 rounded"
           >
-            촬영: 2055년 3월 14일 14:23 KST / 장소: 서울특별시 강남구
+            촬영: 2065년 3월 14일 14:23 KST / 장소: 서울특별시 강남구
             <br />
             촬영자: Gemini-Nano-Banana-v47 / ISO: 3200 / f/1.8
           </motion.div>
