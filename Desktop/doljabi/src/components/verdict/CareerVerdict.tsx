@@ -210,9 +210,9 @@ export default function CareerVerdict({ onComplete }: CareerVerdictProps) {
                     {timelineEvents.map((event, i) => (
                       <div key={i} className="relative">
                         <div className="absolute left-4 -translate-x-1/2 -top-1 z-10">
-                          <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                            <span className="text-[7px] font-bold text-black">
-                              {String(event.year).slice(2)}
+                          <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                            <span className="text-[8px] font-bold text-black">
+                              {event.age}세
                             </span>
                           </div>
                         </div>
