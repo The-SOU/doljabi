@@ -20,7 +20,7 @@ const STEPS = {
   MATCHING: { progress: 50, label: "직업 현역자 184,392명과 대조 중..." },
   STALL: { progress: 58, label: "⚠️ 비범한 기상 감지... 정밀 재분석 중" },
   GWANSANG: { progress: 65, label: "AI 예측 근거 생성 중..." },
-  IMAGE_GEN: { progress: 75, label: "10세 / 20세 / 40세 얼굴 생성 중..." },
+  IMAGE_GEN: { progress: 75, label: "10세 / 20세 / 30세 얼굴 생성 중..." },
   IMAGE_DONE: { progress: 95, label: "노화 시뮬레이션 완료" },
   COMPLETE: { progress: 100, label: "✓ 분석 완료" },
 };
@@ -93,7 +93,7 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
         // Step 5: 이미지 생성 (병렬, 분석 화면에서 진행)
         updateProgress(STEPS.IMAGE_GEN);
 
-        const ages = [10, 20, 40];
+        const ages = [10, 20, 30];
         await Promise.all(
           ages.map(async (age) => {
             const result = await generateAgedFace(

@@ -28,7 +28,7 @@ export default function SharePanel() {
       try {
         await navigator.share({
           title: "제미나이 돌잡이 결과",
-          text: `우리 아기는 40년 후 ${topOccupation.occupation.nameKo}! (일치율 ${topOccupation.percentage}%) - 제미나이 돌잡이`,
+          text: `우리 아기는 30년 후 ${topOccupation.occupation.nameKo}! (일치율 ${topOccupation.percentage}%) - 제미나이 돌잡이`,
           url: window.location.origin,
         });
       } catch {

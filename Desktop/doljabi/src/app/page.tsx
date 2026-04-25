@@ -35,7 +35,7 @@ export default function Home() {
                   제미나이 돌잡이
                 </h1>
                 <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                  AI가 예측하는 우리 아이의 40년 후
+                  AI가 예측하는 우리 아이의 30년 후
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
                   <span className="px-2 py-1 bg-gray-800 rounded-full">Powered by Gemini</span>
@@ -76,7 +76,7 @@ export default function Home() {
                 &ldquo;쓸모없는 AI 만들기&rdquo; 해커톤 출품작
               </p>
               <p className="mt-4 text-[9px] text-gray-800 font-mono">
-                v2.0.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
+                v2.1.0 | Gemini 2.5 Flash + Imagen 4 + MediaPipe Face Landmarker
               </p>
             </div>
           </motion.div>

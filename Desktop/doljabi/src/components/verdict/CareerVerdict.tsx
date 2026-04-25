@@ -31,7 +31,7 @@ export default function CareerVerdict({ onComplete }: CareerVerdictProps) {
   const setTimelineEvents = useSessionStore((s) => s.setTimelineEvents);
   const setTimelineLoading = useSessionStore((s) => s.setTimelineLoading);
 
-  const adultFace = generatedFaces[40] || babyImage;
+  const adultFace = generatedFaces[30] || babyImage;
 
   // 타임라인 생성 (마운트 시 바로 시작)
   useEffect(() => {
@@ -133,7 +133,7 @@ export default function CareerVerdict({ onComplete }: CareerVerdictProps) {
                     <div className="w-36 h-44 rounded-lg overflow-hidden border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
                       <img
                         src={adultFace || ""}
-                        alt="40년 후 예상"
+                        alt="30년 후 예상"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -199,7 +199,7 @@ export default function CareerVerdict({ onComplete }: CareerVerdictProps) {
                     PREDICTED_TIMELINE
                   </h3>
                   <p className="text-gray-600 text-[10px] font-mono">
-                    {topOccupation.occupation.emoji} {topOccupation.occupation.nameKo} — 40년 생애 시뮬레이션
+                    {topOccupation.occupation.emoji} {topOccupation.occupation.nameKo} — 30년 생애 시뮬레이션
                   </p>
                 </div>
 

@@ -141,7 +141,7 @@ function getOccupationAttire(occupation: string): string {
     "과학자": "white lab coat, in a research laboratory with equipment",
     "CEO": "premium tailored business suit, in a luxury office with city view",
     "100만 유튜버": "casual trendy streetwear, with ring light and camera setup visible behind",
-    "아이돌": "stylish K-pop stage outfit, with dramatic concert lighting",
+    "아이돌": "glamorous K-pop idol stage outfit with sequins and glitter, colorful concert stage lighting with LED screens behind, holding a microphone, K-pop music video aesthetic, flawless skin with Korean beauty makeup",
     "축구선수": "Korean national team soccer jersey, on a soccer field",
     "셰프": "white chef's coat and tall chef hat, in a professional kitchen",
     "대통령": "formal navy suit with Korean flag pin, at a presidential podium with Korean flags",
@@ -178,14 +178,16 @@ Facial features matured from childhood: ${faceDescription}
 - MUST look exactly like a real 20-year-old Korean ${youngAdult}, NOT a cartoon or illustration
 - Gender: ${genderEn}`,
 
-    40: `A photorealistic portrait photo of a 40-year-old Korean ${genderEn} professional ${occupation}.
-Facial features fully matured: ${faceDescription}
-- Fully mature adult ${genderEn} face with professional demeanor and slight signs of aging
+    30: `A photorealistic portrait photo of a 30-year-old Korean ${genderEn} professional ${occupation}.
+Facial features matured: ${faceDescription}
+- Young adult ${genderEn} face in early 30s, still youthful but more mature than 20s
+- Slightly more defined features than 20s, but no wrinkles or aging signs
 - ${getOccupationAttire(occupation)}
-- Confident authoritative expression befitting a successful ${occupation}
+- Confident expression befitting a successful young ${occupation}
 - Professional photography lighting
 - Shot on Canon EOS R5, 85mm lens, f/2.8
-- MUST look exactly like a real 40-year-old Korean ${genderKo} ${occupation}, NOT a cartoon or illustration
+- MUST look exactly like a real 30-year-old Korean ${genderKo} ${occupation}, NOT a cartoon or illustration
+- The person should look young, in their early 30s — older than 20 but still youthful
 - Gender: ${genderEn}`,
   };
 
