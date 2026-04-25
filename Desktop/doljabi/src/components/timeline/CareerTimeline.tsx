@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useSessionStore } from "@/store/session";
+import { generateTimeline } from "@/lib/gemini-client";
 import NewspaperCard from "./NewspaperCard";
 
 interface CareerTimelineProps {
@@ -22,18 +23,10 @@ export default function CareerTimeline({ onComplete }: CareerTimelineProps) {
 
     setTimelineLoading(true);
 
-    fetch("/api/generate-timeline", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        occupationName: analysisResult.topOccupation.occupation.nameKo,
-        occupationId: analysisResult.topOccupation.occupation.id,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.events?.length) {
-          setTimelineEvents(data.events);
+    generateTimeline(analysisResult.topOccupation.occupation.nameKo)
+      .then((events) => {
+        if (events?.length) {
+          setTimelineEvents(events);
         }
       })
       .catch(console.error)

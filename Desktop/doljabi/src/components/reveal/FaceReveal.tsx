@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSessionStore } from "@/store/session";
+import { generateAgedFace } from "@/lib/gemini-client";
 
 interface FaceRevealProps {
   onComplete: () => void;
@@ -34,22 +35,17 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
     const generateFaces = async () => {
       for (const age of [10, 20, 30]) {
         try {
-          const res = await fetch("/api/generate-face", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              imageBase64: babyImage,
-              targetAge: age,
-              occupation: analysisResult.topOccupation.occupation.nameKo,
-              faceDescription: analysisResult.faceDescription,
-            }),
-          });
-          const data = await res.json();
-          if (data.image) {
-            setGeneratedFace(age, `data:image/png;base64,${data.image}`);
+          const result = await generateAgedFace(
+            babyImage,
+            age,
+            analysisResult.topOccupation.occupation.nameKo,
+            analysisResult.faceDescription
+          );
+          if (result) {
+            setGeneratedFace(age, result);
           }
         } catch {
-          // Fallback: continue without generated image
+          // Continue without generated image
         }
       }
       setAgedFaceLoading(false);
@@ -60,13 +56,12 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
 
   // Timelapse animation
   useEffect(() => {
-    const timings = [0, 3000, 6000, 9000]; // ms for each stage
+    const timings = [0, 3000, 6000, 9000];
 
     const timeouts = timings.map((delay, i) =>
       setTimeout(() => {
         setCurrentStage(i);
         if (i === AGE_STAGES.length - 1) {
-          // Final stage: grayscale then color
           setIsGrayscale(true);
           setTimeout(() => {
             setIsGrayscale(false);
@@ -83,14 +78,13 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
   const getCurrentImage = () => {
     const stage = AGE_STAGES[currentStage];
     if (stage.age === 1) return babyImage;
-    return generatedFaces[stage.age] || babyImage; // fallback to baby
+    return generatedFaces[stage.age] || babyImage;
   };
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center gap-6 px-4">
       <h2 className="text-xl font-bold text-amber-400">시간 여행 중...</h2>
 
-      {/* Age counter */}
       <div className="text-center">
         <motion.div
           key={currentStage}
@@ -105,7 +99,6 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
         </p>
       </div>
 
-      {/* Face image with morphing */}
       <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden bg-gray-900">
         <AnimatePresence mode="wait">
           <motion.img
@@ -124,7 +117,6 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
           />
         </AnimatePresence>
 
-        {/* Age progress bar at bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800">
           <motion.div
             className="h-full bg-amber-400"
@@ -134,7 +126,6 @@ export default function FaceReveal({ onComplete }: FaceRevealProps) {
         </div>
       </div>
 
-      {/* Fake camera info */}
       <AnimatePresence>
         {showInfo && (
           <motion.div

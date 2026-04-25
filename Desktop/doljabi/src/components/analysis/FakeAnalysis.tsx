@@ -5,6 +5,8 @@ import FaceLandmarks from "./FaceLandmarks";
 import TerminalLog from "./TerminalLog";
 import ProgressBar from "./ProgressBar";
 import { useSessionStore } from "@/store/session";
+import { analyzeBabyFace, generateGwansangText } from "@/lib/gemini-client";
+import { matchOccupations } from "@/lib/matching-client";
 
 interface FakeAnalysisProps {
   onComplete: () => void;
@@ -21,27 +23,34 @@ export default function FakeAnalysis({ onComplete }: FakeAnalysisProps) {
   useEffect(() => {
     setIsActive(true);
 
-    // Fire real API call
+    // Fire real Gemini API call directly from client
     if (babyImage) {
-      fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: babyImage }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data.error) {
-            setAnalysisResult({
-              topOccupation: data.topOccupation,
-              allMatches: data.allMatches,
-              gwansangText: data.gwansangText,
-              faceDescription: data.faceDescription,
-              featureVector: data.featureVector,
-            });
-          }
+      (async () => {
+        try {
+          const analysis = await analyzeBabyFace(babyImage);
+          const matches = matchOccupations(analysis.featureVector);
+          const topMatch = matches[0];
+
+          const gwansangText = await generateGwansangText(
+            topMatch.occupation.nameKo,
+            analysis.faceDescription,
+            topMatch.percentage,
+            topMatch.occupation.gwansangKeywords
+          );
+
+          setAnalysisResult({
+            topOccupation: topMatch,
+            allMatches: matches,
+            gwansangText,
+            faceDescription: analysis.faceDescription,
+            featureVector: analysis.featureVector,
+          });
+        } catch (e) {
+          console.error("Analysis error:", e);
+        } finally {
           setApiDone(true);
-        })
-        .catch(() => setApiDone(true));
+        }
+      })();
     }
   }, [babyImage, setAnalysisResult]);
 
